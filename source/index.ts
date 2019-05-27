@@ -64,15 +64,15 @@ export default class WikidataEntityStore {
 		}
 	}
 
-	availableResourceKeys(): ReadonlyArray<string> {
+	availableResourceKeys(): readonly string[] {
 		return Array.from(this._resourceKeys.keys());
 	}
 
-	availableEntities(): ReadonlyArray<string> {
+	availableEntities(): readonly string[] {
 		return Array.from(this._entities.keys());
 	}
 
-	allEntities(): ReadonlyArray<EntitySimplified> {
+	allEntities(): readonly EntitySimplified[] {
 		return Array.from(this._entities.values());
 	}
 

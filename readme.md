@@ -1,4 +1,10 @@
-# wikidata-entity-store [![Build Status](https://travis-ci.com/EdJoPaTo/wikidata-entity-store.svg?branch=master)](https://travis-ci.com/EdJoPaTo/wikidata-entity-store)
+# wikidata-entity-store
+
+[![NPM Version](https://img.shields.io/npm/v/wikidata-entity-store.svg)](https://www.npmjs.com/package/wikidata-entity-store)
+[![node](https://img.shields.io/node/v/wikidata-entity-store.svg)](https://www.npmjs.com/package/wikidata-entity-store)
+[![Build Status](https://travis-ci.com/EdJoPaTo/wikidata-entity-store.svg?branch=master)](https://travis-ci.com/EdJoPaTo/wikidata-entity-store)
+[![Dependency Status](https://david-dm.org/EdJoPaTo/wikidata-entity-store/status.svg)](https://david-dm.org/EdJoPaTo/wikidata-entity-store)
+[![Dev Dependency Status](https://david-dm.org/EdJoPaTo/wikidata-entity-store/dev-status.svg)](https://david-dm.org/EdJoPaTo/wikidata-entity-store?type=dev)
 
 > Handles loading and caching of Wikidata Entities for you
 

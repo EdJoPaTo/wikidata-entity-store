@@ -1,6 +1,6 @@
 {
 	"name": "wikidata-entity-store",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"description": "Handles loading and caching of Wikidata Entities for you",
 	"license": "MIT",
 	"repository": "EdJoPaTo/wikidata-entity-store",

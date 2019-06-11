@@ -1,5 +1,10 @@
 import {EntitySimplified, Property, isEntityId} from 'wikidata-sdk';
 import {getEntitiesSimplified} from 'wikidata-sdk-got';
+import * as yaml from 'js-yaml';
+
+/* eslint @typescript-eslint/no-var-requires: warn */
+/* eslint @typescript-eslint/no-require-imports: warn */
+const tableize = require('tableize-object');
 
 type Dictionary<T> = {[key: string]: T};
 
@@ -43,6 +48,12 @@ export default class WikidataEntityStore {
 		for (const {key, qNumber} of entries) {
 			this._resourceKeys.set(key, qNumber);
 		}
+	}
+
+	async addResourceKeyYaml(yamlString: string): Promise<void> {
+		const yamlObject = yaml.safeLoad(yamlString);
+		const dict: Dictionary<string> = tableize(yamlObject);
+		return this.addResourceKeyDict(dict);
 	}
 
 	async preloadQNumbers(...qNumbers: string[]): Promise<void> {

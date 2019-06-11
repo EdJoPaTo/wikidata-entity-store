@@ -46,6 +46,21 @@ test('can addResourceKeyArr', async t => {
 	t.deepEqual(store.availableResourceKeys(), ['human', 'earth']);
 });
 
+test('can addResourceKeyYaml', async t => {
+	const store = new WikidataEntityStore({
+		entityStore: createEntityMap()
+	});
+
+	const yaml = `human: Q5
+earth: Q2`;
+
+	await t.notThrowsAsync(async () =>
+		store.addResourceKeyYaml(yaml)
+	);
+
+	t.deepEqual(store.availableResourceKeys(), ['human', 'earth']);
+});
+
 test('can not add same resourceKey twice', async t => {
 	const store = new WikidataEntityStore({
 		entityStore: createEntityMap()

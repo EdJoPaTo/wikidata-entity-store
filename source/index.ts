@@ -66,6 +66,16 @@ export default class WikidataEntityStore {
 		return this.addResourceKeyDict(dict);
 	}
 
+	async loadQNumbers(updateWhenOlderThanUnixTimestamp: UnixTimestamp, ...qNumbers: string[]): Promise<void> {
+		const neededQNumbers = qNumbers
+			.filter(o => {
+				const existingValue = this._entities.get(o);
+				return !existingValue || existingValue.lastUpdate < updateWhenOlderThanUnixTimestamp;
+			});
+
+		return this.forceloadQNumbers(...neededQNumbers);
+	}
+
 	async preloadQNumbers(...qNumbers: string[]): Promise<void> {
 		const neededQNumbers = qNumbers
 			.filter(o => !this._entities.get(o));

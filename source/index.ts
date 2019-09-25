@@ -33,19 +33,15 @@ export default class WikidataEntityStore {
 	}
 
 	async addResourceKeyArr(entries: ReadonlyArray<{key: string; qNumber: string}>): Promise<void> {
-		const keys = entries.map(o => o.key);
 		const qNumbers = entries.map(o => o.qNumber);
-
-		const existingKeys = this.availableResourceKeys();
-		for (const key of keys) {
-			if (existingKeys.includes(key)) {
-				throw new Error(`key already existing: ${key}`);
-			}
-		}
-
 		await this.preloadQNumbers(...qNumbers);
 
 		for (const {key, qNumber} of entries) {
+			const existingValue = this._resourceKeys.get(key);
+			if (existingValue && existingValue !== qNumber) {
+				throw new Error(`key ${key} already exists with a different value: ${qNumber} !== ${existingValue}`);
+			}
+
 			this._resourceKeys.set(key, qNumber);
 		}
 	}

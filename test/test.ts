@@ -74,6 +74,18 @@ test('can not add same resourceKey twice', async t => {
 	);
 });
 
+test('can add the same resourceKey twice', async t => {
+	const store = new WikidataEntityStore({
+		entityStore: createEntityStore()
+	});
+
+	await store.addResourceKeyDict({human: 'Q5'});
+
+	await t.notThrowsAsync(
+		async () => store.addResourceKeyDict({human: 'Q5'})
+	);
+});
+
 test('can preloadQNumbers', async t => {
 	const store = new WikidataEntityStore({
 		entityStore: createEntityStore()

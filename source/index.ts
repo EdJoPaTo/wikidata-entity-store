@@ -7,6 +7,12 @@ import * as yaml from 'js-yaml';
 /* eslint @typescript-eslint/no-require-imports: warn */
 const tableize = require('tableize-object');
 
+type UnixTimestamp = number;
+export interface EntityEntry {
+	entity: EntitySimplified;
+	lastUpdate: UnixTimestamp;
+}
+
 interface EntityStoreTyped<T> {
 	keys(): readonly string[];
 	entries(): Dictionary<T>;
@@ -14,7 +20,7 @@ interface EntityStoreTyped<T> {
 	set(qNumber: string, value: T): void | Promise<void>;
 }
 
-export type EntityStore = EntityStoreTyped<EntitySimplified>;
+export type EntityStore = EntityStoreTyped<EntityEntry>;
 
 export interface Options {
 	properties?: Property[];
@@ -32,7 +38,7 @@ export default class WikidataEntityStore {
 		options: Options = {}
 	) {
 		this._properties = options.properties || [];
-		this._entities = options.entityStore || new KeyValueInMemory<EntitySimplified>();
+		this._entities = options.entityStore || new KeyValueInMemory<EntityEntry>();
 	}
 
 	async addResourceKeyDict(resourceKeys: Dictionary<string>): Promise<void> {
@@ -74,8 +80,12 @@ export default class WikidataEntityStore {
 			props: this._properties
 		});
 
+		const lastUpdate = Math.floor(Date.now() / 1000);
 		for (const qNumber of Object.keys(entities)) {
-			this._entities.set(qNumber, entities[qNumber]);
+			this._entities.set(qNumber, {
+				entity: entities[qNumber],
+				lastUpdate
+			});
 		}
 	}
 
@@ -89,7 +99,7 @@ export default class WikidataEntityStore {
 
 	allEntities(): readonly EntitySimplified[] {
 		const entries = this._entities.entries();
-		return Object.values(entries);
+		return Object.values(entries).map(o => o.entity);
 	}
 
 	qNumber(keyOrQNumber: string): string {
@@ -106,13 +116,15 @@ export default class WikidataEntityStore {
 
 	entity(keyOrQNumber: string): EntitySimplified {
 		const qNumber = this.qNumber(keyOrQNumber);
+		const entry = this._entities.get(qNumber);
+		if (entry) {
+			return entry.entity;
+		}
 
-		const fallback: EntitySimplified = {
+		return {
 			id: qNumber,
 			type: 'item'
 		};
-
-		return this._entities.get(qNumber) || fallback;
 	}
 }
 

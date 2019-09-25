@@ -2,7 +2,7 @@ import {EntitySimplified} from 'wikidata-sdk';
 import {KeyValueInMemory} from '@edjopato/datastore';
 import test from 'ava';
 
-import WikidataEntityStore, {EntityStore} from '../source';
+import WikidataEntityStore, {EntityStore, EntityEntry} from '../source';
 
 function createEntityStore(): EntityStore {
 	const human: EntitySimplified = {
@@ -15,9 +15,15 @@ function createEntityStore(): EntityStore {
 		id: 'Q2'
 	};
 
-	const store = new KeyValueInMemory<EntitySimplified>();
-	store.set('Q5', human);
-	store.set('Q2', earth);
+	const store = new KeyValueInMemory<EntityEntry>();
+	store.set('Q5', {
+		entity: human,
+		lastUpdate: 42
+	});
+	store.set('Q2', {
+		entity: earth,
+		lastUpdate: 1337
+	});
 	return store;
 }
 

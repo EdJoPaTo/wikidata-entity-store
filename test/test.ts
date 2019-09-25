@@ -1,8 +1,10 @@
 import {EntitySimplified} from 'wikidata-sdk';
+import {KeyValueInMemory} from '@edjopato/datastore';
 import test from 'ava';
-import WikidataEntityStore from '../source';
 
-function createEntityStore(): Map<string, EntitySimplified> {
+import WikidataEntityStore, {EntityStore} from '../source';
+
+function createEntityStore(): EntityStore {
 	const human: EntitySimplified = {
 		type: 'item',
 		id: 'Q5'
@@ -13,10 +15,10 @@ function createEntityStore(): Map<string, EntitySimplified> {
 		id: 'Q2'
 	};
 
-	return new Map([
-		['Q5', human],
-		['Q2', earth]
-	]);
+	const store = new KeyValueInMemory<EntitySimplified>();
+	store.set('Q5', human);
+	store.set('Q2', earth);
+	return store;
 }
 
 test('can addResourceKeyDict', async t => {

@@ -1,3 +1,4 @@
+import {Dictionary, KeyValueInMemory} from '@edjopato/datastore';
 import {EntitySimplified, Property, isEntityId} from 'wikidata-sdk';
 import {getEntitiesSimplified} from 'wikidata-sdk-got';
 import * as yaml from 'js-yaml';
@@ -6,17 +7,24 @@ import * as yaml from 'js-yaml';
 /* eslint @typescript-eslint/no-require-imports: warn */
 const tableize = require('tableize-object');
 
-type Dictionary<T> = {[key: string]: T};
+interface EntityStoreTyped<T> {
+	keys(): readonly string[];
+	entries(): Dictionary<T>;
+	get(qNumber: string): T | undefined;
+	set(qNumber: string, value: T): void | Promise<void>;
+}
+
+export type EntityStore = EntityStoreTyped<EntitySimplified>;
 
 export interface Options {
 	properties?: Property[];
-	entityStore?: Map<string, EntitySimplified>;
+	entityStore?: EntityStore;
 }
 
 export default class WikidataEntityStore {
 	private readonly _resourceKeys: Dictionary<string> = {};
 
-	private readonly _entities: Map<string, EntitySimplified>;
+	private readonly _entities: EntityStore;
 
 	private readonly _properties?: Property[];
 
@@ -24,7 +32,7 @@ export default class WikidataEntityStore {
 		options: Options = {}
 	) {
 		this._properties = options.properties || [];
-		this._entities = options.entityStore || new Map();
+		this._entities = options.entityStore || new KeyValueInMemory<EntitySimplified>();
 	}
 
 	async addResourceKeyDict(resourceKeys: Dictionary<string>): Promise<void> {
@@ -54,7 +62,7 @@ export default class WikidataEntityStore {
 
 	async preloadQNumbers(...qNumbers: string[]): Promise<void> {
 		const neededQNumbers = qNumbers
-			.filter(o => !this._entities.has(o));
+			.filter(o => !this._entities.get(o));
 
 		return this.forceloadQNumbers(...neededQNumbers);
 	}
@@ -76,11 +84,12 @@ export default class WikidataEntityStore {
 	}
 
 	availableEntities(): readonly string[] {
-		return Array.from(this._entities.keys());
+		return this._entities.keys();
 	}
 
 	allEntities(): readonly EntitySimplified[] {
-		return Array.from(this._entities.values());
+		const entries = this._entities.entries();
+		return Object.values(entries);
 	}
 
 	qNumber(keyOrQNumber: string): string {

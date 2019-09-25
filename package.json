@@ -27,6 +27,7 @@
 		"wikidata"
 	],
 	"dependencies": {
+		"@edjopato/datastore": "^0.1.0",
 		"js-yaml": "^3.13.1",
 		"tableize-object": "^0.1.0",
 		"wikidata-sdk": "^6.5.0",

@@ -168,3 +168,19 @@ test('allEntities', t => {
 		}
 	]);
 });
+
+test('entityLastUpdate existing', t => {
+	const store = new WikidataEntityStore({
+		entityStore: createEntityStore()
+	});
+
+	t.is(store.entityLastUpdate('Q5'), 42);
+});
+
+test('entityLastUpdate not existing', t => {
+	const store = new WikidataEntityStore({
+		entityStore: createEntityStore()
+	});
+
+	t.is(store.entityLastUpdate('Q666'), undefined);
+});

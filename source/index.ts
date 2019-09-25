@@ -126,6 +126,12 @@ export default class WikidataEntityStore {
 			type: 'item'
 		};
 	}
+
+	entityLastUpdate(keyOrQNumber: string): UnixTimestamp | undefined {
+		const qNumber = this.qNumber(keyOrQNumber);
+		const entry = this._entities.get(qNumber);
+		return entry && entry.lastUpdate;
+	}
 }
 
 // For CommonJS default export support

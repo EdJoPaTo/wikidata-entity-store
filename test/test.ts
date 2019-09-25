@@ -2,7 +2,7 @@ import {EntitySimplified} from 'wikidata-sdk';
 import test from 'ava';
 import WikidataEntityStore from '../source';
 
-function createEntityMap(): Map<string, EntitySimplified> {
+function createEntityStore(): Map<string, EntitySimplified> {
 	const human: EntitySimplified = {
 		type: 'item',
 		id: 'Q5'
@@ -21,7 +21,7 @@ function createEntityMap(): Map<string, EntitySimplified> {
 
 test('can addResourceKeyDict', async t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	await t.notThrowsAsync(async () =>
@@ -33,7 +33,7 @@ test('can addResourceKeyDict', async t => {
 
 test('can addResourceKeyArr', async t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	await t.notThrowsAsync(async () =>
@@ -48,7 +48,7 @@ test('can addResourceKeyArr', async t => {
 
 test('can addResourceKeyYaml', async t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	const yaml = `human: Q5
@@ -63,7 +63,7 @@ earth: Q2`;
 
 test('can not add same resourceKey twice', async t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	await store.addResourceKeyDict({human: 'Q5'});
@@ -76,7 +76,7 @@ test('can not add same resourceKey twice', async t => {
 
 test('can preloadQNumbers', async t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	await t.notThrowsAsync(async () =>
@@ -88,7 +88,7 @@ test('can preloadQNumbers', async t => {
 
 test('qNumber of resourceKey', async t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	await store.addResourceKeyDict({human: 'Q5'});
@@ -97,7 +97,7 @@ test('qNumber of resourceKey', async t => {
 
 test('qNumber of qNumber', t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	t.is(store.qNumber('Q5'), 'Q5');
@@ -112,7 +112,7 @@ test('qNumber of not a qNumber does not work', t => {
 
 test('entity of cached', t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	t.deepEqual(store.entity('Q5'), {
@@ -123,7 +123,7 @@ test('entity of cached', t => {
 
 test('entity of not cached', t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	t.deepEqual(store.entity('Q666'), {
@@ -134,7 +134,7 @@ test('entity of not cached', t => {
 
 test('allEntities', t => {
 	const store = new WikidataEntityStore({
-		entityStore: createEntityMap()
+		entityStore: createEntityStore()
 	});
 
 	t.deepEqual(store.allEntities(), [

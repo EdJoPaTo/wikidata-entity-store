@@ -15,7 +15,7 @@
 	"scripts": {
 		"build": "del dist && tsc",
 		"prepack": "npm run build",
-		"test": "del dist && xo && nyc ava && tsc"
+		"test": "tsc && xo && nyc ava"
 	},
 	"main": "dist/source",
 	"types": "dist/source",
@@ -42,25 +42,19 @@
 		"del-cli": "^3.0.0",
 		"eslint-config-xo-typescript": "^0.18.0",
 		"nyc": "^14.1.1",
-		"ts-node": "^8.0.2",
 		"typescript": "^3.3.3",
 		"xo": "^0.24.0"
 	},
 	"ava": {
 		"babel": false,
-		"compileEnhancements": false,
-		"extensions": [
-			"ts"
-		],
-		"require": [
-			"ts-node/register"
-		]
+		"compileEnhancements": false
 	},
 	"nyc": {
 		"extension": [
 			".ts"
 		],
 		"include": [
+			"dist/source",
 			"source"
 		],
 		"exclude": [

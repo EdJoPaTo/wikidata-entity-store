@@ -14,7 +14,7 @@ export interface Options {
 }
 
 export default class WikidataEntityStore {
-	private readonly _resourceKeys: Map<string, string> = new Map();
+	private readonly _resourceKeys: Dictionary<string> = {};
 
 	private readonly _entities: Map<string, EntitySimplified>;
 
@@ -37,12 +37,12 @@ export default class WikidataEntityStore {
 		await this.preloadQNumbers(...qNumbers);
 
 		for (const {key, qNumber} of entries) {
-			const existingValue = this._resourceKeys.get(key);
+			const existingValue = this._resourceKeys[key];
 			if (existingValue && existingValue !== qNumber) {
 				throw new Error(`key ${key} already exists with a different value: ${qNumber} !== ${existingValue}`);
 			}
 
-			this._resourceKeys.set(key, qNumber);
+			this._resourceKeys[key] = qNumber;
 		}
 	}
 
@@ -72,7 +72,7 @@ export default class WikidataEntityStore {
 	}
 
 	availableResourceKeys(): readonly string[] {
-		return Array.from(this._resourceKeys.keys());
+		return Object.keys(this._resourceKeys);
 	}
 
 	availableEntities(): readonly string[] {
@@ -84,8 +84,8 @@ export default class WikidataEntityStore {
 	}
 
 	qNumber(keyOrQNumber: string): string {
-		if (this._resourceKeys.has(keyOrQNumber)) {
-			return this._resourceKeys.get(keyOrQNumber) as string;
+		if (this._resourceKeys[keyOrQNumber]) {
+			return this._resourceKeys[keyOrQNumber];
 		}
 
 		if (!isEntityId(keyOrQNumber)) {

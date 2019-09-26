@@ -66,6 +66,25 @@ export default class WikidataEntityStore {
 		return this.addResourceKeyDict(dict);
 	}
 
+	async updateQNumbers(qNumbers: readonly string[], updateOldestNPercentage = 0.6): Promise<void> {
+		await this.preloadQNumbers(...qNumbers);
+
+		// Ensure to only update things which are at least 1 hour old
+		const updateWhenOlderThanUnixTimestamp = 1000 * 60 * 60;
+
+		const neededQNumbers = qNumbers
+			.filter(o => {
+				const existingValue = this._entities.get(o);
+				return existingValue && existingValue.lastUpdate < updateWhenOlderThanUnixTimestamp;
+			});
+
+		const update = neededQNumbers
+			.sort(sortSmallestFirst(o => this._entities.get(o)!.lastUpdate))
+			.slice(0, Math.ceil(neededQNumbers.length * updateOldestNPercentage));
+
+		return this.forceloadQNumbers(...update);
+	}
+
 	async loadQNumbers(updateWhenOlderThanUnixTimestamp: UnixTimestamp, ...qNumbers: string[]): Promise<void> {
 		const neededQNumbers = qNumbers
 			.filter(o => {
@@ -142,6 +161,10 @@ export default class WikidataEntityStore {
 		const entry = this._entities.get(qNumber);
 		return entry && entry.lastUpdate;
 	}
+}
+
+function sortSmallestFirst<T>(selector: (obj: T) => number): (a: T, b: T) => number {
+	return (a, b) => selector(a) - selector(b);
 }
 
 // For CommonJS default export support

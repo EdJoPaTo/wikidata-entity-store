@@ -94,6 +94,18 @@ test('can add the same resourceKey twice', async t => {
 	);
 });
 
+test('can updateQNumbers', async t => {
+	const store = new WikidataEntityStore({
+		entityStore: createEntityStore()
+	});
+
+	await t.notThrowsAsync(async () =>
+		store.updateQNumbers(['Q5'])
+	);
+
+	t.deepEqual(store.availableEntities(), ['Q5', 'Q2']);
+});
+
 test('can loadQNumbers', async t => {
 	const store = new WikidataEntityStore({
 		entityStore: createEntityStore()

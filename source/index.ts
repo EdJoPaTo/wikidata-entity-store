@@ -27,6 +27,8 @@ export interface Options {
 	entityStore?: EntityStore;
 }
 
+const HOUR_IN_SECONDS = 60 * 60;
+
 export default class WikidataEntityStore {
 	private readonly _resourceKeys: Dictionary<string> = {};
 
@@ -70,7 +72,8 @@ export default class WikidataEntityStore {
 		await this.preloadQNumbers(...qNumbers);
 
 		// Ensure to only update things which are at least 1 hour old
-		const updateWhenOlderThanUnixTimestamp = 1000 * 60 * 60;
+		const now = Date.now() / 1000;
+		const updateWhenOlderThanUnixTimestamp = now - HOUR_IN_SECONDS;
 
 		const neededQNumbers = qNumbers
 			.filter(o => {

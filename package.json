@@ -41,7 +41,7 @@
 		"@typescript-eslint/parser": "^2.3.1",
 		"ava": "^2.1.0",
 		"del-cli": "^3.0.0",
-		"eslint-config-xo-typescript": "^0.18.0",
+		"eslint-config-xo-typescript": "^0.19.0",
 		"nyc": "^14.1.1",
 		"typescript": "^3.3.3",
 		"xo": "^0.25.3"
@@ -73,7 +73,13 @@
 			"ts"
 		],
 		"rules": {
-			"@typescript-eslint/require-await": "warn",
+			"@typescript-eslint/strict-boolean-expressions": "off",
+			"@typescript-eslint/no-unnecessary-condition": [
+				"error",
+				{
+					"ignoreRhs": true
+				}
+			],
 			"ava/no-ignored-test-files": "off",
 			"unicorn/prefer-spread": "warn"
 		}

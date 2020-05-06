@@ -79,7 +79,7 @@ await store.addResourceKeyDict({human: 'Q5', earth: 'Q2'});
 
 #### resourceKeys
 
-Type: `Dictionary<string, string>`
+Type: `Record<string, string>`
 
 - Key: human readable key for easier development of your tool
 - Value: Q-Number

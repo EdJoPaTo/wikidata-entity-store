@@ -1,6 +1,6 @@
-import {Dictionary, KeyValueInMemory} from '@edjopato/datastore';
 import {EntitySimplified, Property, isEntityId} from 'wikidata-sdk';
 import {getEntitiesSimplified} from 'wikidata-sdk-got';
+import {KeyValueInMemory} from '@edjopato/datastore';
 import * as yaml from 'js-yaml';
 
 /* eslint @typescript-eslint/no-var-requires: warn */
@@ -15,7 +15,7 @@ export interface EntityEntry {
 
 interface EntityStoreTyped<T> {
 	keys(): readonly string[];
-	entries(): Dictionary<T>;
+	entries(): Record<string, T>;
 	get(qNumber: string): T | undefined;
 	set(qNumber: string, value: T): void | Promise<void>;
 }
@@ -30,7 +30,7 @@ export interface Options {
 const HOUR_IN_SECONDS = 60 * 60;
 
 export default class WikidataEntityStore {
-	private readonly _resourceKeys: Dictionary<string> = {};
+	private readonly _resourceKeys: Record<string, string> = {};
 
 	private readonly _entities: EntityStore;
 
@@ -43,7 +43,7 @@ export default class WikidataEntityStore {
 		this._entities = options.entityStore || new KeyValueInMemory<EntityEntry>();
 	}
 
-	async addResourceKeyDict(resourceKeys: Dictionary<string>): Promise<void> {
+	async addResourceKeyDict(resourceKeys: Record<string, string>): Promise<void> {
 		const entries = Object.keys(resourceKeys).map(o => ({key: o, qNumber: resourceKeys[o]}));
 		return this.addResourceKeyArr(entries);
 	}
@@ -64,7 +64,7 @@ export default class WikidataEntityStore {
 
 	async addResourceKeyYaml(yamlString: string): Promise<void> {
 		const yamlObject = yaml.safeLoad(yamlString);
-		const dict: Dictionary<string> = tableize(yamlObject);
+		const dict: Record<string, string> = tableize(yamlObject);
 		return this.addResourceKeyDict(dict);
 	}
 

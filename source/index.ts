@@ -1,30 +1,32 @@
-import {EntitySimplified, Property, isEntityId} from 'wikidata-sdk';
+import {EntitySimplified, Property} from 'wikidata-sdk-got/dist/source/wikibase-sdk-types';
 import {getEntitiesSimplified} from 'wikidata-sdk-got';
 import {KeyValueInMemory} from '@edjopato/datastore';
 import * as yaml from 'js-yaml';
 
-/* eslint @typescript-eslint/no-var-requires: warn */
-/* eslint @typescript-eslint/no-require-imports: warn */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const tableize = require('tableize-object');
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const {isEntityId} = require('wikibase-sdk');
 
 type UnixTimestamp = number;
 export interface EntityEntry {
-	entity: EntitySimplified;
-	lastUpdate: UnixTimestamp;
+	readonly entity: EntitySimplified;
+	readonly lastUpdate: UnixTimestamp;
 }
 
 interface EntityStoreTyped<T> {
-	keys(): readonly string[];
-	entries(): Record<string, T>;
-	get(qNumber: string): T | undefined;
-	set(qNumber: string, value: T): void | Promise<void>;
+	readonly keys: () => readonly string[];
+	readonly entries: () => Record<string, T | undefined>;
+	readonly get: (qNumber: string) => T | undefined;
+	readonly set: (qNumber: string, value: T) => void | Promise<void>;
 }
 
 export type EntityStore = EntityStoreTyped<EntityEntry>;
 
 export interface Options {
-	properties?: Property[];
-	entityStore?: EntityStore;
+	readonly properties?: Property[];
+	readonly entityStore?: EntityStore;
 }
 
 const HOUR_IN_SECONDS = 60 * 60;
@@ -39,16 +41,16 @@ export default class WikidataEntityStore {
 	constructor(
 		options: Options = {}
 	) {
-		this._properties = options.properties || [];
-		this._entities = options.entityStore || new KeyValueInMemory<EntityEntry>();
+		this._properties = options.properties ?? [];
+		this._entities = options.entityStore ?? new KeyValueInMemory<EntityEntry>();
 	}
 
-	async addResourceKeyDict(resourceKeys: Record<string, string>): Promise<void> {
+	async addResourceKeyDict(resourceKeys: Readonly<Record<string, string>>): Promise<void> {
 		const entries = Object.keys(resourceKeys).map(o => ({key: o, qNumber: resourceKeys[o]}));
 		return this.addResourceKeyArr(entries);
 	}
 
-	async addResourceKeyArr(entries: ReadonlyArray<{key: string; qNumber: string}>): Promise<void> {
+	async addResourceKeyArr(entries: ReadonlyArray<{readonly key: string; readonly qNumber: string}>): Promise<void> {
 		const qNumbers = entries.map(o => o.qNumber);
 		await this.preloadQNumbers(...qNumbers);
 
@@ -88,7 +90,7 @@ export default class WikidataEntityStore {
 		return this.forceloadQNumbers(...update);
 	}
 
-	async loadQNumbers(updateWhenOlderThanUnixTimestamp: UnixTimestamp, ...qNumbers: string[]): Promise<void> {
+	async loadQNumbers(updateWhenOlderThanUnixTimestamp: UnixTimestamp, ...qNumbers: readonly string[]): Promise<void> {
 		const neededQNumbers = qNumbers
 			.filter(o => {
 				const existingValue = this._entities.get(o);
@@ -98,7 +100,7 @@ export default class WikidataEntityStore {
 		return this.forceloadQNumbers(...neededQNumbers);
 	}
 
-	async preloadQNumbers(...qNumbers: string[]): Promise<void> {
+	async preloadQNumbers(...qNumbers: readonly string[]): Promise<void> {
 		const neededQNumbers = qNumbers
 			.filter(o => !this._entities.get(o));
 
@@ -106,19 +108,20 @@ export default class WikidataEntityStore {
 	}
 
 	// Ensures the qNumbers are load even when they were already loaded
-	async forceloadQNumbers(...qNumbers: string[]): Promise<void> {
+	async forceloadQNumbers(...qNumbers: readonly string[]): Promise<void> {
 		const entities = await getEntitiesSimplified({
 			ids: qNumbers,
 			props: this._properties
 		});
 
 		const lastUpdate = Math.floor(Date.now() / 1000);
-		for (const qNumber of Object.keys(entities)) {
-			this._entities.set(qNumber, {
+
+		await Promise.all(Object.keys(entities)
+			.map(async qNumber => this._entities.set(qNumber, {
 				entity: entities[qNumber],
 				lastUpdate
-			});
-		}
+			}))
+		);
 	}
 
 	availableResourceKeys(): readonly string[] {
@@ -131,7 +134,7 @@ export default class WikidataEntityStore {
 
 	allEntities(): readonly EntitySimplified[] {
 		const entries = this._entities.entries();
-		return Object.values(entries).map(o => o.entity);
+		return Object.values(entries).map(o => o!.entity);
 	}
 
 	qNumber(keyOrQNumber: string): string {
@@ -162,7 +165,7 @@ export default class WikidataEntityStore {
 	entityLastUpdate(keyOrQNumber: string): UnixTimestamp | undefined {
 		const qNumber = this.qNumber(keyOrQNumber);
 		const entry = this._entities.get(qNumber);
-		return entry && entry.lastUpdate;
+		return entry?.lastUpdate;
 	}
 }
 

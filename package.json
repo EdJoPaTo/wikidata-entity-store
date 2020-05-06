@@ -10,12 +10,12 @@
 		"url": "https://edjopato.de"
 	},
 	"engines": {
-		"node": ">=8"
+		"node": ">=10"
 	},
 	"scripts": {
 		"build": "del dist && tsc",
 		"prepack": "npm run build",
-		"test": "tsc && xo && nyc ava"
+		"test": "tsc --sourceMap && xo && nyc ava"
 	},
 	"main": "dist/source",
 	"types": "dist/source",
@@ -27,28 +27,21 @@
 		"wikidata"
 	],
 	"dependencies": {
-		"@edjopato/datastore": "^0.1.0",
+		"@edjopato/datastore": "^0.2.1",
 		"js-yaml": "^3.13.1",
 		"tableize-object": "^0.1.0",
-		"wikidata-sdk": "^6.5.0",
-		"wikidata-sdk-got": "^1.1.0"
+		"wikibase-sdk": "^7.4.1",
+		"wikidata-sdk-got": "^2.0.0"
 	},
 	"devDependencies": {
-		"@sindresorhus/tsconfig": "^0.4.0",
+		"@sindresorhus/tsconfig": "^0.7.0",
 		"@types/js-yaml": "^3.12.1",
-		"@types/node": "^12.0.2",
-		"@typescript-eslint/eslint-plugin": "^2.3.1",
-		"@typescript-eslint/parser": "^2.3.1",
-		"ava": "^2.1.0",
+		"@types/node": "^13.13.5",
+		"ava": "^3.8.1",
 		"del-cli": "^3.0.0",
-		"eslint-config-xo-typescript": "^0.19.0",
-		"nyc": "^14.1.1",
+		"nyc": "^15.0.1",
 		"typescript": "^3.3.3",
-		"xo": "^0.25.3"
-	},
-	"ava": {
-		"babel": false,
-		"compileEnhancements": false
+		"xo": "^0.30.0"
 	},
 	"nyc": {
 		"extension": [
@@ -68,20 +61,18 @@
 		]
 	},
 	"xo": {
-		"extends": "xo-typescript",
-		"extensions": [
-			"ts"
-		],
 		"rules": {
-			"@typescript-eslint/strict-boolean-expressions": "off",
-			"@typescript-eslint/no-unnecessary-condition": [
-				"error",
-				{
-					"ignoreRhs": true
+			"ava/no-ignored-test-files": "off"
+		},
+		"overrides": [
+			{
+				"files": [
+					"test/**/*"
+				],
+				"rules": {
+					"@typescript-eslint/prefer-readonly-parameter-types": "off"
 				}
-			],
-			"ava/no-ignored-test-files": "off",
-			"unicorn/prefer-spread": "warn"
-		}
+			}
+		]
 	}
 }

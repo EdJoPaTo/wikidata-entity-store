@@ -139,7 +139,7 @@ const qNumber = store.qNumber('Q42');
 Get the entity of the given key or Q-Number.
 
 This is currently the simplified version of the entity (`EntitySimplified`) in order to have a smaller cache.
-See [wikidata-sdk](https://github.com/maxlath/wikidata-sdk) for more information about it.
+See [wikibase-sdk](https://github.com/maxlath/wikibase-sdk) for more information about it.
 
 ```js
 const entity = store.entity(keyOrQNumber);

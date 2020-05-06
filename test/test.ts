@@ -1,4 +1,4 @@
-import {EntitySimplified} from 'wikidata-sdk';
+import {EntitySimplified} from 'wikidata-sdk-got/dist/source/wikibase-sdk-types';
 import {KeyValueInMemory} from '@edjopato/datastore';
 import test from 'ava';
 
@@ -78,7 +78,7 @@ test('can not add same resourceKey twice', async t => {
 
 	await t.throwsAsync(
 		async () => store.addResourceKeyDict({human: 'Q2'}),
-		/key.+exist/
+		{message: /key.+exist/}
 	);
 });
 
@@ -151,7 +151,7 @@ test('qNumber of not a qNumber does not work', t => {
 	const store = new WikidataEntityStore();
 	t.throws(() => {
 		store.qNumber('bob');
-	}, /argument.+bob/i);
+	}, {message: /argument.+bob/i});
 });
 
 test('entity of cached', t => {

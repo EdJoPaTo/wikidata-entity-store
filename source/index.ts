@@ -9,19 +9,13 @@ const tableize = require('tableize-object');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const {isEntityId} = require('wikibase-sdk');
 
-type UnixTimestamp = number;
-export interface EntityEntry {
-	readonly entity: EntitySimplified;
-	readonly lastUpdate: UnixTimestamp;
-}
-
 interface Store<T> {
 	readonly keys: () => readonly string[];
 	readonly get: (qNumber: string) => T | undefined;
-	readonly set: (qNumber: string, value: T) => unknown;
+	readonly set: (qNumber: string, value: T, ttl?: number) => unknown;
 }
 
-export type EntityStore = Store<EntityEntry>;
+export type EntityStore = Store<EntitySimplified>;
 
 export interface Options {
 	readonly properties?: Property[];
@@ -41,7 +35,7 @@ export default class WikidataEntityStore {
 		options: Options = {}
 	) {
 		this._properties = options.properties ?? [];
-		this._entities = options.entityStore ?? new KeyValueInMemory<EntityEntry>();
+		this._entities = options.entityStore ?? new KeyValueInMemory<EntitySimplified>();
 	}
 
 	async addResourceKeyDict(resourceKeys: Readonly<Record<string, string>>): Promise<void> {
@@ -69,36 +63,6 @@ export default class WikidataEntityStore {
 		return this.addResourceKeyDict(dict);
 	}
 
-	async updateQNumbers(qNumbers: readonly string[], updateOldestNPercentage = 0.6): Promise<void> {
-		await this.preloadQNumbers(...qNumbers);
-
-		// Ensure to only update things which are at least 1 hour old
-		const now = Date.now() / 1000;
-		const updateWhenOlderThanUnixTimestamp = now - HOUR_IN_SECONDS;
-
-		const neededQNumbers = qNumbers
-			.filter(o => {
-				const existingValue = this._entities.get(o);
-				return existingValue && existingValue.lastUpdate < updateWhenOlderThanUnixTimestamp;
-			});
-
-		const update = neededQNumbers
-			.sort(sortSmallestFirst(o => this._entities.get(o)!.lastUpdate))
-			.slice(0, Math.ceil(neededQNumbers.length * updateOldestNPercentage));
-
-		return this.forceloadQNumbers(...update);
-	}
-
-	async loadQNumbers(updateWhenOlderThanUnixTimestamp: UnixTimestamp, ...qNumbers: readonly string[]): Promise<void> {
-		const neededQNumbers = qNumbers
-			.filter(o => {
-				const existingValue = this._entities.get(o);
-				return !existingValue || existingValue.lastUpdate < updateWhenOlderThanUnixTimestamp;
-			});
-
-		return this.forceloadQNumbers(...neededQNumbers);
-	}
-
 	async preloadQNumbers(...qNumbers: readonly string[]): Promise<void> {
 		const neededQNumbers = qNumbers
 			.filter(o => !this._entities.get(o));
@@ -113,13 +77,8 @@ export default class WikidataEntityStore {
 			props: this._properties
 		});
 
-		const lastUpdate = Math.floor(Date.now() / 1000);
-
 		await Promise.all(Object.keys(entities)
-			.map(async qNumber => this._entities.set(qNumber, {
-				entity: entities[qNumber],
-				lastUpdate
-			}))
+			.map(async qNumber => this._entities.set(qNumber, entities[qNumber], HOUR_IN_SECONDS * 1000))
 		);
 	}
 
@@ -135,7 +94,6 @@ export default class WikidataEntityStore {
 		const allKeys = this._entities.keys();
 		return allKeys
 			.map(o => this._entities.get(o)!)
-			.map(o => o.entity)
 	}
 
 	qNumber(keyOrQNumber: string): string {
@@ -154,7 +112,7 @@ export default class WikidataEntityStore {
 		const qNumber = this.qNumber(keyOrQNumber);
 		const entry = this._entities.get(qNumber);
 		if (entry) {
-			return entry.entity;
+			return entry;
 		}
 
 		return {
@@ -162,16 +120,6 @@ export default class WikidataEntityStore {
 			type: 'item'
 		};
 	}
-
-	entityLastUpdate(keyOrQNumber: string): UnixTimestamp | undefined {
-		const qNumber = this.qNumber(keyOrQNumber);
-		const entry = this._entities.get(qNumber);
-		return entry?.lastUpdate;
-	}
-}
-
-function sortSmallestFirst<T>(selector: (obj: T) => number): (a: T, b: T) => number {
-	return (a, b) => selector(a) - selector(b);
 }
 
 // For CommonJS default export support

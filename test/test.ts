@@ -2,7 +2,7 @@ import {EntitySimplified} from 'wikidata-sdk-got/dist/source/wikibase-sdk-types'
 import {KeyValueInMemory} from '@edjopato/datastore';
 import test from 'ava';
 
-import WikidataEntityStore, {EntityStore, EntityEntry} from '../source';
+import WikidataEntityStore, {EntityStore} from '../source';
 
 function createEntityStore(): EntityStore {
 	const human: EntitySimplified = {
@@ -15,15 +15,9 @@ function createEntityStore(): EntityStore {
 		id: 'Q2'
 	};
 
-	const store = new KeyValueInMemory<EntityEntry>();
-	store.set('Q5', {
-		entity: human,
-		lastUpdate: 42
-	});
-	store.set('Q2', {
-		entity: earth,
-		lastUpdate: 1337
-	});
+	const store = new KeyValueInMemory<EntitySimplified>();
+	store.set('Q5', human);
+	store.set('Q2', earth);
 	return store;
 }
 
@@ -92,30 +86,6 @@ test('can add the same resourceKey twice', async t => {
 	await t.notThrowsAsync(
 		async () => store.addResourceKeyDict({human: 'Q5'})
 	);
-});
-
-test('can updateQNumbers', async t => {
-	const store = new WikidataEntityStore({
-		entityStore: createEntityStore()
-	});
-
-	await t.notThrowsAsync(async () =>
-		store.updateQNumbers(['Q5'])
-	);
-
-	t.deepEqual(store.availableEntities(), ['Q5', 'Q2']);
-});
-
-test('can loadQNumbers', async t => {
-	const store = new WikidataEntityStore({
-		entityStore: createEntityStore()
-	});
-
-	await t.notThrowsAsync(async () =>
-		store.loadQNumbers(5, 'Q5')
-	);
-
-	t.deepEqual(store.availableEntities(), ['Q5', 'Q2']);
 });
 
 test('can preloadQNumbers', async t => {
@@ -191,20 +161,4 @@ test('allEntities', t => {
 			id: 'Q2'
 		}
 	]);
-});
-
-test('entityLastUpdate existing', t => {
-	const store = new WikidataEntityStore({
-		entityStore: createEntityStore()
-	});
-
-	t.is(store.entityLastUpdate('Q5'), 42);
-});
-
-test('entityLastUpdate not existing', t => {
-	const store = new WikidataEntityStore({
-		entityStore: createEntityStore()
-	});
-
-	t.is(store.entityLastUpdate('Q666'), undefined);
 });

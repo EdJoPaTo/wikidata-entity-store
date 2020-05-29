@@ -15,14 +15,13 @@ export interface EntityEntry {
 	readonly lastUpdate: UnixTimestamp;
 }
 
-interface EntityStoreTyped<T> {
+interface Store<T> {
 	readonly keys: () => readonly string[];
-	readonly entries: () => Record<string, T | undefined>;
 	readonly get: (qNumber: string) => T | undefined;
-	readonly set: (qNumber: string, value: T) => void | Promise<void>;
+	readonly set: (qNumber: string, value: T) => unknown;
 }
 
-export type EntityStore = EntityStoreTyped<EntityEntry>;
+export type EntityStore = Store<EntityEntry>;
 
 export interface Options {
 	readonly properties?: Property[];
@@ -133,8 +132,10 @@ export default class WikidataEntityStore {
 	}
 
 	allEntities(): readonly EntitySimplified[] {
-		const entries = this._entities.entries();
-		return Object.values(entries).map(o => o!.entity);
+		const allKeys = this._entities.keys();
+		return allKeys
+			.map(o => this._entities.get(o)!)
+			.map(o => o.entity)
 	}
 
 	qNumber(keyOrQNumber: string): string {
